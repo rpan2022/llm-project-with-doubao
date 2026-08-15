@@ -12,3 +12,6 @@ venv/
 gpg-key-params.txt
 gpg-keys.txt
 gpg-public-key.asc
+
+# 第三方教材代码（独立仓库，可自行 git pull 更新）
+stage-01/code/
