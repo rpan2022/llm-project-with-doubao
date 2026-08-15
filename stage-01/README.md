@@ -4,6 +4,26 @@
 > 周期：4 周
 > 目标：从零理解并实现 GPT 模型核心组件，跑通预训练 / SFT / DPO / LoRA 全流程
 
+## 教材代码
+
+教材代码位于 `./code/` 目录（即 `stage-01/code/`），是从 [LLMs-from-scratch 官方仓库](https://github.com/rasbt/LLMs-from-scratch) 克隆的独立 Git 仓库，已加入 `.gitignore`。
+
+```
+stage-01/
+├── README.md          # 本文件（学习记录）
+└── code/              # 教材代码
+    ├── ch01/ ~ ch07/  # 各章节 Notebook
+    ├── appendix-A/ ~ appendix-E/
+    ├── pkg/           # 可安装的 gpt-from-scratch 包
+    └── setup/         # 环境配置
+```
+
+更新教材代码：
+```bash
+cd stage-01/code
+git pull
+```
+
 ---
 
 ## 学习路线总览
