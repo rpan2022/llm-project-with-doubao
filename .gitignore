@@ -1,0 +1,14 @@
+.vscode/
+__pycache__/
+*.pyc
+.DS_Store
+*.egg-info/
+dist/
+build/
+.env
+venv/
+
+# GPG 临时文件
+gpg-key-params.txt
+gpg-keys.txt
+gpg-public-key.asc
