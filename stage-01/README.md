@@ -32,7 +32,7 @@ git pull
 |------|------|----------|------|
 | 第1周 | Ch2 | 文本数据、BPE 分词、数据加载器 | ☑ |
 | 第1-2周 | Ch3 | 多头自注意力、因果掩码 | ☑ 核心课程完成，习题留作下周复习 |
-| 第2周 | Ch4 | 完整 GPT 模型搭建（嵌入、位置编码、Transformer 块、LN、残差） | ☐ |
+| 第2周 | Ch4 | 完整 GPT 模型搭建（嵌入、位置编码、Transformer 块、LN、残差） | ☑ |
 | 第3周 | Ch5 | 预训练与文本生成 | ☐ |
 | 第3-4周 | Ch6 + Ch7 + 附录E | SFT 监督微调、DPO 偏好对齐、LoRA | ☐ |
 | 第4周 | 复习验收 | 复盘核心代码、完成习题、手写 GPT 推理 | ☐ |
@@ -132,19 +132,42 @@ context_vec:             (b, num_heads, num_tokens, head_dim)
 ## 第2周：Ch4 完整 GPT 模型搭建
 
 ### 学习目标
-- [ ] 完整 GPT 前向传播
-- [ ] 拆解：嵌入、位置编码、Transformer 块、LN、残差连接
-- [ ] 从零搭建可推理的基础 GPT 模型
+- [x] 完整 GPT 前向传播
+- [x] 拆解：嵌入、位置编码、Transformer 块、LN、残差连接
+- [x] 从零搭建可推理的基础 GPT 模型
+
+> ✅ 已学完（2026-08-18）
 
 ### 学习笔记
 
+详细笔记见：[`notes/ch04_implementing_gpt_model_notes.md`](notes/ch04_implementing_gpt_model_notes.md)
+
 #### 核心概念
+- GPT-2 124M 配置：vocab=50257, ctx=1024, emb=768, 12头, 12层
+- LayerNorm（Pre-LN）：沿特征维归一化，scale/shift 可训练参数
+- GELU 激活：平滑版 ReLU，负数区有非零梯度
+- 前馈网络：768→3072→768（4倍扩展）
+- 残差连接：`x = x + sublayer(LN(x))`，缓解梯度消失
+- TransformerBlock：注意力子层 + 前馈子层，各带残差
+- 可学习位置编码（非正弦）
+- 权重共享（weight tying）：124M vs 163M 的区别
+- 贪心解码：逐 token 自回归生成
 
 #### 代码实现
+- `LayerNorm`、`GELU`、`FeedForward`、`TransformerBlock`、`GPTModel`
+- `generate_text_simple`：贪心解码文本生成
+- 完整可运行脚本：`code/ch04/01_main-chapter-code/gpt.py`
 
 #### 模型架构记录
+```
+token ids → tok_emb + pos_emb → dropout → TransformerBlock×12 → final_norm → out_head → logits
+```
+- 参数量：163M（无权重共享）/ 124M（有权重共享）
+- 单卡内存：约 652MB（float32 权重），训练时 ~2-3GB
+- 运行验证：输入 "Hello, I am" → 输出 14 个 token（随机权重下为乱码，前向传播正确）
 
 ### 遇到的问题与解决
+- 无（代码直接运行通过，输出与 tests.py 预期一致）
 
 ---
 
@@ -224,4 +247,6 @@ context_vec:             (b, num_heads, num_tokens, head_dim)
 
 | 章节 | 笔记路径 |
 |------|---------|
+| Ch02 文本数据 | [`notes/ch02_working_with_text_data.md`](notes/ch02_working_with_text_data.md) |
 | Ch03 注意力机制 | [`notes/ch03_attention_mechanisms_notes.md`](notes/ch03_attention_mechanisms_notes.md) |
+| Ch04 实现 GPT 模型 | [`notes/ch04_implementing_gpt_model_notes.md`](notes/ch04_implementing_gpt_model_notes.md) |
