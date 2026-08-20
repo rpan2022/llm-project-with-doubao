@@ -174,22 +174,48 @@ token ids → tok_emb + pos_emb → dropout → TransformerBlock×12 → final_n
 ## 第3周：Ch5 预训练与文本生成
 
 ### 学习目标
-- [ ] 训练小参数量 GPT
-- [ ] 文本采样生成
+- [x] 训练小参数量 GPT（代码已整理，待实际运行）
+- [x] 文本采样生成（greedy + temperature + top-k）
 - [ ] 加载轻量 Qwen/Llama 小版本做推理
-- [ ] 跑通预训练循环，理解训练/推理区别
+- [x] 跑通预训练循环，理解训练/推理区别
+
+> 📝 代码与核心概念已整理完成（2026-08-20），实际训练运行待执行
 
 ### 学习笔记
 
+详细笔记见：[`notes/ch05_pretraining_on_unlabeled_data_notes.md`](notes/ch05_pretraining_on_unlabeled_data_notes.md)
+
 #### 核心概念
+- **预训练目标**：下一个 token 预测的交叉熵损失（自监督学习，无需人工标注）
+- **训练循环四步法**：`zero_grad()` → `forward()` → `backward()` → `step()`
+- **损失计算**：`F.cross_entropy(logits.flatten(0,1), target.flatten())`，把 batch×seq 合并成 N
+- **模型评估**：`model.eval()` + `torch.no_grad()`，定期计算 train/val loss
+- **训练/验证集划分**：90:10 字符级切分，训练集 shuffle+drop_last，验证集不 shuffle
+- **AdamW 优化器**：学习率 5e-4，权重衰减 0.1
+- **模型保存/加载**：`torch.save(model.state_dict())` / `load_state_dict(weights_only=True)`
+- **GPT-2 权重下载**：从 OpenAI Azure Blob 下载 TF checkpoint，支持 backup URL
+- **TF→PyTorch 权重映射**：变量名解析 + 转置（TF 是 in×out，PyTorch 是 out×in）+ QKV split
+- **Weight Tying**：输出层与 token embedding 共享权重，124M vs 163M 的区别
+- **高级采样策略**：
+  - top-k：只保留概率最高的 k 个候选，过滤离谱选项
+  - temperature：缩放 logits，<1 更尖锐保守，>1 更平坦多样
+  - 两者可叠加使用：先 top-k 过滤，再 temperature 缩放，最后 softmax+采样
+- **数值稳定性**：softmax 前减去最大值防止 exp 溢出
+
+#### 关键文件
+- `gpt_train.py`：独立训练脚本（本章训练代码总结版）
+- `gpt_generate.py`：独立生成脚本（加载 GPT-2 权重 + 高级采样）
+- `gpt_download.py`：GPT-2 权重下载工具（带 backup URL）
+- `previous_chapters.py`：前 4 章代码汇总（GPTModel, MHA, DataLoader 等）
 
 #### 训练记录
 
 | 实验 | 模型规模 | 数据集 | 训练时长 | Loss | 生成效果 |
 |------|----------|--------|----------|------|----------|
-|      |          |        |          |      |          |
+| 待运行 | 124M (ctx=256) | the-verdict.txt (~20k tokens) | - | - | - |
 
 ### 遇到的问题与解决
+- 无（代码整理阶段，实际运行待执行）
 
 ---
 
@@ -250,3 +276,4 @@ token ids → tok_emb + pos_emb → dropout → TransformerBlock×12 → final_n
 | Ch02 文本数据 | [`notes/ch02_working_with_text_data.md`](notes/ch02_working_with_text_data.md) |
 | Ch03 注意力机制 | [`notes/ch03_attention_mechanisms_notes.md`](notes/ch03_attention_mechanisms_notes.md) |
 | Ch04 实现 GPT 模型 | [`notes/ch04_implementing_gpt_model_notes.md`](notes/ch04_implementing_gpt_model_notes.md) |
+| Ch05 预训练与文本生成 | [`notes/ch05_pretraining_on_unlabeled_data_notes.md`](notes/ch05_pretraining_on_unlabeled_data_notes.md) |
